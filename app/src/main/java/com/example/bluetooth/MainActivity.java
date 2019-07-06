@@ -33,8 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private String result;
 
 
-    private ArrayList<String> rssiArr;//rssi的值
-    private ArrayList<String> rssiName; //rssi的名字
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,27 +49,15 @@ public class MainActivity extends AppCompatActivity {
         initBluetooth();//初始化
         openBluetooth();//开启
         registerBoard();//注册
-        //startDiscovery();//搜索
 
 
     }
 
 
     public void initRssi() {
-
-        rssiName = new ArrayList<String>();
-        rssiName.add("EWF1341805A");//增加信标
-        rssiName.add("EWD8DA94E6E");
-        rssiName.add("EWC6093F0E5");
-
-        rssiArr = new ArrayList<String>();//距离由rssi获取
-        rssiArr.add("EWF1341805A");
-        rssiArr.add("EWD8DA94E6E");
-        rssiArr.add("EWC6093F0E5");
-
         RssiArrName[0]="EWF1341805A";
-        RssiArrName[0]="EWD8DA94E6E";
-        RssiArrName[0]="EWC6093F0E5";
+        RssiArrName[1]="EWD8DA94E6E";
+        RssiArrName[2]="EWC6093F0E5";
         RssiArrNew[0] = RssiArrNew[1] = RssiArrNew[2] = -1.0;
         RssiArrSum[0] = RssiArrSum[2] = RssiArrSum[2] = 0;
         RssiArrNum[0] = RssiArrNum[2] = RssiArrNum[2] = 0;
@@ -120,21 +107,21 @@ public class MainActivity extends AppCompatActivity {
                 double Rssi;
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED) {
                     name = device.getName();
-                    if (rssiName.get(0).equals(name)) {
+                    if (RssiArrName[0].equals(name)) {
                         rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                         Rssi = Math.abs(rssi);
                         Log.e(TAG, "录入:" + name + "=" + Rssi);
                         RssiArrSum[0] += Rssi;
                         RssiArrNum[0]++;
                         numFlag++;
-                    } else if (rssiName.get(1).equals(name)) {
+                    } else if (RssiArrName[1].equals(name)) {
                         rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                         Rssi = Math.abs(rssi);
                         Log.e(TAG, "录入:" + name + "=" + Rssi);
                         RssiArrSum[1] += Rssi;
                         RssiArrNum[1]++;
                         numFlag++;
-                    } else if (rssiName.get(2).equals(name)) {
+                    } else if (RssiArrName[2].equals(name)) {
                         rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, Short.MIN_VALUE);
                         Rssi = Math.abs(rssi);
                         Log.e(TAG, "录入:" + name + "=" + Rssi);
