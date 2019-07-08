@@ -13,7 +13,6 @@ public class KNN {
         data[0].setCoordinate("3,1");
         data[1].setCoordinate("3,2");
         data[2].setCoordinate("3,3");
-
         data[0].setRssi(new double[]{76, 84, 74});
         data[1].setRssi(new double[]{86, 86, 76});
         data[2].setRssi(new double[]{89, 87, 64});
@@ -47,8 +46,6 @@ public class KNN {
             double distance = d;
             data[i].setDistance(distance);
         }
-
-
     }
 }
 

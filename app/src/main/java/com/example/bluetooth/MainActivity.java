@@ -14,30 +14,24 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
-
-
 public class MainActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        activeBluetooth();
+    }
 
-    private double distanceX, distanceY;
+
+
     public static final String TAG = "mBluetooth";
     private BluetoothAdapter bluetoothAdapter;//本地蓝牙适配器
-    private String[] RssiArrName=new String[3];
+    private String[] RssiArrName = new String[3];
     private double[] RssiArrNew = new double[3];
     private double[] RssiArrSum = new double[3];
     private double[] RssiArrNum = new double[3];
     private double[] RssiResult = new double[3];
     private String result;
-
-
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        activeBluetooth();//蓝牙模块
-    }
 
     public void activeBluetooth() {
         Log.d(TAG, "蓝牙模块启动");
@@ -49,15 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
     public void initRssi() {
-        RssiArrName[0]="EWF1341805A";
-        RssiArrName[1]="EWD8DA94E6E";
-        RssiArrName[2]="EWC6093F0E5";
+        RssiArrName[0] = "EWF1341805A";
+        RssiArrName[1] = "EWD8DA94E6E";
+        RssiArrName[2] = "EWC6093F0E5";
         RssiArrNew[0] = RssiArrNew[1] = RssiArrNew[2] = -1.0;
-        RssiArrSum[0] = RssiArrSum[2] = RssiArrSum[2] = 0;
-        RssiArrNum[0] = RssiArrNum[2] = RssiArrNum[2] = 0;
-
+        RssiArrSum[0] = RssiArrSum[1] = RssiArrSum[2] = 0;
+        RssiArrNum[0] = RssiArrNum[1] = RssiArrNum[2] = 0;
     }
 
     public void initBluetooth() {
@@ -89,9 +81,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private int numSearch=0;
-    int numFlag=0;
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private int numSearch = 0;
+    int numFlag = 0;
+    public final int sumSearchNum=3;//总搜索次数
+
+    public final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, final Intent intent) {
             String action = intent.getAction();
@@ -125,39 +119,31 @@ public class MainActivity extends AppCompatActivity {
                         RssiArrNum[2]++;
                         numFlag++;
                     }
-                    if(numFlag>=3){
+                    if (numFlag >= 3) {
                         bluetoothAdapter.cancelDiscovery();
                     }
                 }
             } else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)) {
-                Log.e(TAG, numSearch+"次结束搜索");
-                if(numSearch++<2) {
-                    numFlag=0;
+                Log.e(TAG, numSearch + "次结束搜索");
+                if (numSearch++ < sumSearchNum) {
+                    numFlag = 0;
                     bluetoothAdapter.startDiscovery();
-                }
-                else{
-                    Log.e(TAG, "全部10次扫描完成");
-                    Log.e(TAG,"F1:"+RssiArrSum[0]/RssiArrNum[0]+"  D8:"+RssiArrSum[1]/RssiArrNum[1]+"  C6:"+RssiArrSum[2]/RssiArrNum[2]);
+                } else {
+                    Log.e(TAG, "全部扫描完成");
+                    Log.e(TAG, "F1:" + RssiArrSum[0] / RssiArrNum[0] + "  D8:" + RssiArrSum[1] / RssiArrNum[1] + "  C6:" + RssiArrSum[2] / RssiArrNum[2]);
                     AlertDialog.Builder builder;
                     builder = new AlertDialog.Builder(MainActivity.this);
                     builder.setTitle("Rssi");
 //                    distance(0, 12, 0, 0, 6, 4.8, getDistance(RssiArrNew[0]), getDistance(RssiArrNew[1]), getDistance(RssiArrNew[2]));
-
-
-                    for (int k=0;k<3;k++){
-                        RssiResult[k] =RssiArrSum[k]/RssiArrNum[k];
+                    for (int k = 0; k < 3; k++) {
+                        RssiResult[k] = RssiArrSum[k] / RssiArrNum[k];
                     }
+                    //KNN
                     KNN knn = new KNN();
-
                     knn.init();
                     knn.Euclid(RssiResult);
-
-
-                    result=knn.knn_result();
-
-                    builder.setMessage("F1:"+RssiResult[0]+"\nD8:"+RssiResult[1]+"\nC6:"+RssiResult[2]+"\nResult:"+result);
-
-
+                    result = knn.knn_result();
+                    builder.setMessage("F1:" + RssiResult[0] + "\nD8:" + RssiResult[1] + "\nC6:" + RssiResult[2] + "\nResult:" + result);
 //                    builder.setMessage(
 //                            "F1 - " + RssiArrNew[0] + "dBm - " + getDistance(RssiArrNew[0]) + "\n" +
 //                                    "D8 - " + RssiArrNew[1] + "dBm - " + getDistance(RssiArrNew[1]) + "\n" +
@@ -166,13 +152,11 @@ public class MainActivity extends AppCompatActivity {
                     builder.setPositiveButton("确定", null);
                     builder.show();
                 }
-
-
-
             }
         }
     };
-
+    //用于三点定位
+    private double distanceX, distanceY;
     public double getDistance(double Rssi) {
         Rssi = (Rssi - 60) / 36.0;
         double d = Math.pow(10.0, Rssi);
@@ -198,8 +182,8 @@ public class MainActivity extends AppCompatActivity {
         Toast toast = Toast.makeText(getApplicationContext(), "Searching...", Toast.LENGTH_SHORT);
         toast.show();
         Log.e(TAG, "搜索模块启动");
-        numFlag=0;
-        numSearch=0;
+        numFlag = 0;
+        numSearch = 0;
         initRssi();
         if (bluetoothAdapter.isEnabled()) {
             bluetoothAdapter.startDiscovery();
